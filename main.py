@@ -1,3 +1,4 @@
+from email.mime import image
 from bs4 import BeautifulSoup
 import requests
 
@@ -23,7 +24,13 @@ def noticia_cnn_solo(url):
         cuerpo = soup.find('div',class_="l-container").get_text()
         imagen = soup.find('img',class_="media__image media__image--responsive") ## imagen['data-src-large']
         link = url
-        
+        print(titulo)
+        print(autor)
+        print(fecha)
+        print(cuerpo)
+        print(imagen)
+        print(link) 
+            
     except:
         titulo = soup.find('h1',class_="media__video-headline").get_text()
         autor = soup.find('span',class_="metadata__source-name").get_text()
@@ -31,6 +38,12 @@ def noticia_cnn_solo(url):
         imagen = 'https://pbs.twimg.com/profile_images/500790162775760896/aLM0MMqI_400x400.jpeg'
         cuerpo = soup.find('div',class_="media__video-description media__video-description--inline").get_text()
         link = url
+        print(titulo)
+        print(autor)
+        print(fecha)
+        print(cuerpo)
+        print(imagen)
+        print(link) 
 
 ##CNN NEWS LINK
 def generar_cnn_varias(url):
@@ -209,3 +222,50 @@ def generar_un_varias(url):
 
 ##EL TIEMPO
 ##El tiempo solo
+def noticia_tiempo_solo(url):
+    resultado = requests.get(url)
+    contenido = resultado.text
+    soup = BeautifulSoup(contenido,'html.parser')
+    titulo = soup.find('h1',class_="titulo").get_text()
+    contenedor_autor = soup.find('div',class_="author_data")
+    autor = contenedor_autor.findChild("span",class_="who-modulo who")
+    fecha = contenedor_autor.findChild("span",class_="publishedAt").get_text()
+    cuerpo_sub = soup.findAll('p',class_="contenido")
+    cuerpo = ""
+    for i in range(len(cuerpo_sub)):
+        cuerpo = cuerpo + cuerpo_sub[i].get_text()
+    imagen = soup.find('img')['src']
+    imagen = "https://www.eltiempo.com" + imagen
+    link = url
+    print(titulo)
+    print(autor)
+    print(fecha)
+    print(cuerpo)
+    print(imagen)
+    print(link) 
+
+#El tiempo Varias
+def generar_tiempo_varias(url):
+    resultado = requests.get(url)
+    contenido = resultado.text
+    soup = BeautifulSoup(contenido,'html.parser')
+    contenedor = soup.findAll('h3',class_="title-container")
+    for i in range(0,len(contenedor)):
+        try:
+            data_1 = contenedor[i].findChild("a",class_="title page-link")["href"]
+            data_1 = "https://www.eltiempo.com/" + data_1
+            noticia_tiempo_solo(data_1)
+        except:
+            print("NO SE PUDO")   
+
+#noticia_tiempo_solo("https://www.eltiempo.com/cultura/gente/pablo-escobar-who-are-the-sons-of-the-famous-colombian-drug-lord-619763")
+#generar_tiempo_varias("https://www.eltiempo.com/noticias/english-news")
+
+def main():
+    generar_cnn_varias('https://edition.cnn.com/business')
+    generar_Huffpost_varias("https://www.huffpost.com/")
+    generar_vice_varias("https://www.vice.com/en/topic/english?page=1")
+    generar_un_varias("https://news.un.org/en/")
+    generar_tiempo_varias("https://www.eltiempo.com/noticias/english-news")
+
+main()
