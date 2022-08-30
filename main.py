@@ -1,4 +1,3 @@
-from email.mime import image
 from bs4 import BeautifulSoup
 import requests
 
@@ -22,8 +21,10 @@ def noticia_cnn_solo(url):
         autor = soup.find('span',class_="metadata__byline__author").get_text()
         fecha = soup.find('p',class_="update-time").get_text()
         cuerpo = soup.find('div',class_="l-container").get_text()
-        imagen = soup.find('img',class_="media__image media__image--responsive") ## imagen['data-src-large']
+        ##CODIGO DE MARIO 
+        imagen = soup.find('img',class_="media__image media__image--responsive")['data-src-large']
         link = url
+        dominio = "CNN"
         print(titulo)
         print(autor)
         print(fecha)
@@ -261,11 +262,11 @@ def generar_tiempo_varias(url):
 #noticia_tiempo_solo("https://www.eltiempo.com/cultura/gente/pablo-escobar-who-are-the-sons-of-the-famous-colombian-drug-lord-619763")
 #generar_tiempo_varias("https://www.eltiempo.com/noticias/english-news")
 
-def main():
-    generar_cnn_varias('https://edition.cnn.com/business')
-    generar_Huffpost_varias("https://www.huffpost.com/")
-    generar_vice_varias("https://www.vice.com/en/topic/english?page=1")
-    generar_un_varias("https://news.un.org/en/")
-    generar_tiempo_varias("https://www.eltiempo.com/noticias/english-news")
+#def main():
+    #generar_cnn_varias('https://edition.cnn.com/business')
+    #generar_Huffpost_varias("https://www.huffpost.com/")
+    #generar_vice_varias("https://www.vice.com/en/topic/english?page=1")
+    #generar_un_varias("https://news.un.org/en/")
+    #generar_tiempo_varias("https://www.eltiempo.com/noticias/english-news")
 
-main()
+#main()
