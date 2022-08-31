@@ -10,7 +10,7 @@ import requests
 ##El tiempo --eng version 
 
 ##DESARROLLO
-data = []
+data_principal = []
 ##CNN
 ##CNN NEWS SOLO
 def noticia_cnn_solo(url):
@@ -33,14 +33,14 @@ def noticia_cnn_solo(url):
             "authors":autor,
             "date_publish":fecha,
             "description":descripcion,
-            "category":categoria,
+            "category":"",
             "language":lenguaje,
             "source_domain":dominio,
             "maintext":cuerpo,
-            "title":titulo,
-            "url":link
-        }
-    data.append(p)
+            "url":link,
+            "title":titulo
+        }   
+    data_principal.append(p)
    
 ##CNN NEWS LINK
 def generar_cnn_varias(url):
@@ -92,11 +92,11 @@ def noticia_Huffpost_solo(url):
             "language":lenguaje,
             "source_domain":dominio,
             "maintext":cuerpo,
-            "title":titulo,
-            "url":link
-        }       
+            "url":link,
+            "title":titulo
+        }        
 
-    data.append(p)
+    data_principal.append(p)
 
 def generar_Huffpost_varias(url):
     resultado = requests.get(url)
@@ -139,10 +139,10 @@ def noticia_vice_solo(url):
             "language":lenguaje,
             "source_domain":dominio,
             "maintext":cuerpo,
-            "title":titulo,
-            "url":link
-        }  
-    data.append(p)
+            "url":link,
+            "title":titulo
+        }    
+    data_principal.append(p)
 
 ##Vice varias
 def generar_vice_varias(url):
@@ -175,12 +175,10 @@ def noticia_un_solo(url):
         cuerpo = ""
         for i in range(len(cuerpo_sub)):
             cuerpo = cuerpo + cuerpo_sub[i].get_text()
+        descripcion = cuerpo.split(".")[0]
+        lenguaje = "en"
+        dominio = "OnuNews"
         link = url
-        print(titulo)
-        print(autor)
-        print(fecha)
-        print(cuerpo)
-        print(link) 
     except:
         titulo = soup.find('h2',class_="story-title quote-text").get_text()
         autor = soup.find('span',class_="un-news-feature scald-credit").get_text()
@@ -189,21 +187,29 @@ def noticia_un_solo(url):
         cuerpo = ""
         for i in range(len(cuerpo_sub)):
             cuerpo = cuerpo + cuerpo_sub[i].get_text()
+        descripcion = cuerpo.split(".")[0]
+        lenguaje = "en"
+        dominio = "OnuNews"
         link = url
-        print(titulo)
-        print(autor)
-        print(fecha)
-        print(cuerpo)
-        print(link) 
-       
-
+    p = {
+            "authors":autor,
+            "date_publish":fecha,
+            "description":descripcion,
+            "category":"",
+            "language":lenguaje,
+            "source_domain":dominio,
+            "maintext":cuerpo,
+            "url":link,
+            "title":titulo
+        }   
+    data_principal.append(p)
+        
 ##UN VARIAS
 def generar_un_varias(url):
     resultado = requests.get(url)
     contenido = resultado.text
     soup = BeautifulSoup(contenido,'html.parser')
-    contenedor = soup.findAll('div',class_="featured-media clearfix")
-    contenedor_2 = soup.findAll('h3',class_="story-title")
+    contenedor = soup.findAll('h3',class_="story-title")
     for i in range(0,len(contenedor)):
         try:
             data_1 = contenedor[i].findChild("a")["href"]
@@ -212,15 +218,8 @@ def generar_un_varias(url):
         except:
             print("NO SE PUDO")
 
-    for i in range(0,len(contenedor_2)):
-        try:
-            data_2 = contenedor_2[i].findChild("a")["href"]
-            data_2 = "https://news.un.org/" + data_2
-            noticia_un_solo(data_1)
-        except:
-            print("NO SE PUDO")
 
-generar_un_varias("https://news.un.org/en/")
+#generar_un_varias("https://news.un.org/en/")
 #noticia_un_solo('https://news.un.org//en/story/2022/08/1125522')
 
 ##EL TIEMPO
@@ -250,10 +249,10 @@ def noticia_tiempo_solo(url):
             "language":lenguaje,
             "source_domain":dominio,
             "maintext":cuerpo,
-            "title":titulo,
-            "url":link
+            "url":link,
+            "title":titulo
         }  
-    data.append(p)
+    data_principal.append(p)
 
 #El tiempo Varias
 def generar_tiempo_varias(url):
@@ -273,15 +272,20 @@ def generar_tiempo_varias(url):
 #generar_tiempo_varias("https://www.eltiempo.com/noticias/english-news")
 
 def main():
+    generar_cnn_varias('https://edition.cnn.com/business')
+    generar_Huffpost_varias("https://www.huffpost.com/")
+    generar_vice_varias("https://www.vice.com/en/topic/english?page=1")
+    generar_un_varias("https://news.un.org/en/")
     generar_tiempo_varias("https://www.eltiempo.com/noticias/english-news")
     with open("data.json","w") as f:
-        json.dump(data,f)
-    
+        json.dump(data_principal,f)
 
-#main()
+def leer():
+    texto =""
+    with open("data.json") as f1:
+        texto = json.load(f1)
+    print(texto[0])
+    print(len(texto)) 
 
-texto =""
-with open("data.json") as f1:
-    texto = json.load(f1)
-print(texto[0])
-print(len(texto))
+main()
+leer()
