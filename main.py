@@ -1,3 +1,4 @@
+import json
 from bs4 import BeautifulSoup
 import requests
 
@@ -9,7 +10,7 @@ import requests
 ##El tiempo --eng version 
 
 ##DESARROLLO
-
+data = []
 ##CNN
 ##CNN NEWS SOLO
 def noticia_cnn_solo(url):
@@ -21,31 +22,26 @@ def noticia_cnn_solo(url):
         autor = soup.find('span',class_="metadata__byline__author").get_text()
         fecha = soup.find('p',class_="update-time").get_text()
         cuerpo = soup.find('div',class_="l-container").get_text()
-        ##CODIGO DE MARIO 
-        imagen = soup.find('img',class_="media__image media__image--responsive")['data-src-large']
+        descripcion = cuerpo.split(".")[0]
+        categoria =""
         link = url
         dominio = "CNN"
-        print(titulo)
-        print(autor)
-        print(fecha)
-        print(cuerpo)
-        print(imagen)
-        print(link) 
-            
+        lenguaje = "en"
     except:
-        titulo = soup.find('h1',class_="media__video-headline").get_text()
-        autor = soup.find('span',class_="metadata__source-name").get_text()
-        fecha = "NaN"
-        imagen = 'https://pbs.twimg.com/profile_images/500790162775760896/aLM0MMqI_400x400.jpeg'
-        cuerpo = soup.find('div',class_="media__video-description media__video-description--inline").get_text()
-        link = url
-        print(titulo)
-        print(autor)
-        print(fecha)
-        print(cuerpo)
-        print(imagen)
-        print(link) 
-
+        print("")
+    p = {
+            "authors":autor,
+            "date_publish":fecha,
+            "description":descripcion,
+            "category":categoria,
+            "language":lenguaje,
+            "source_domain":dominio,
+            "maintext":cuerpo,
+            "title":titulo,
+            "url":link
+        }
+    data.append(p)
+   
 ##CNN NEWS LINK
 def generar_cnn_varias(url):
     resultado = requests.get(url)
@@ -74,29 +70,33 @@ def noticia_Huffpost_solo(url):
         autor = soup.find('span',class_="entry-wirepartner__byline").get_text()
         fecha = soup.find('time').get_text()
         cuerpo = soup.find('div',class_="entry__content-list-container js-cet-unit-buzz_body").get_text()
-        imagen = soup.find('img',class_="img-sized__img landscape") ['src']
+        descripcion = cuerpo.split(".")[0]
+        lenguaje = "en"
+        dominio = "HuffPost"
         link = url
-        print(titulo)
-        print(autor)
-        print(fecha)
-        print(cuerpo)
-        print(imagen)
-        print(link)
         
     except:
         titulo = soup.find('h1',class_="headline").get_text()
         autor = soup.find('a',class_="js-entry-link cet-internal-link")['data-vars-item-name']
         fecha = soup.find('time')['datetime']
         cuerpo = soup.find('section',class_="entry__content-list js-entry-content js-cet-subunit").get_text()
-        imagen = soup.find('img',class_="img-sized__img portrait")['src']
+        descripcion = cuerpo.split(".")[0]
+        lenguaje = "en"
+        dominio = "HuffPost"
         link = url
-        print(titulo)
-        print(autor)
-        print(fecha)
-        print(cuerpo)
-        print(imagen)
-        print(link)
-        
+    p = {
+            "authors":autor,
+            "date_publish":fecha,
+            "description":descripcion,
+            "category":"",
+            "language":lenguaje,
+            "source_domain":dominio,
+            "maintext":cuerpo,
+            "title":titulo,
+            "url":link
+        }       
+
+    data.append(p)
 
 def generar_Huffpost_varias(url):
     resultado = requests.get(url)
@@ -125,16 +125,24 @@ def noticia_vice_solo(url):
         autor = autor_sub.findChild("a").get_text()
         fecha = soup.find('time')['datetime']
         cuerpo = soup.find('div',class_="article__body-components").get_text()
-        imagen = soup.find('source')['srcset']
-        link = url
-        print(titulo)
-        print(autor)
-        print(fecha)
-        print(cuerpo)
-        print(imagen)
-        print(link) 
+        descripcion = cuerpo.split(".")[0]
+        lenguaje ="en"
+        dominio ="Vice"
+        link = url 
     except:
         print("No se pudo")
+    p = {
+            "authors":autor,
+            "date_publish":fecha,
+            "description":descripcion,
+            "category":"",
+            "language":lenguaje,
+            "source_domain":dominio,
+            "maintext":cuerpo,
+            "title":titulo,
+            "url":link
+        }  
+    data.append(p)
 
 ##Vice varias
 def generar_vice_varias(url):
@@ -164,8 +172,6 @@ def noticia_un_solo(url):
         autor = soup.find('span',class_="un-news-full-width scald-credit").get_text()
         fecha = soup.find('div',class_="field-item even").get_text()
         cuerpo_sub = soup.findAll('p')
-        imagen = soup.findAll('img',class_="img-responsive")
-        imagen = imagen[1]["src"]
         cuerpo = ""
         for i in range(len(cuerpo_sub)):
             cuerpo = cuerpo + cuerpo_sub[i].get_text()
@@ -174,15 +180,12 @@ def noticia_un_solo(url):
         print(autor)
         print(fecha)
         print(cuerpo)
-        print(imagen)
         print(link) 
     except:
         titulo = soup.find('h2',class_="story-title quote-text").get_text()
         autor = soup.find('span',class_="un-news-feature scald-credit").get_text()
         fecha = soup.find('div',class_="field-item even").get_text()
         cuerpo_sub = soup.findAll('p')
-        imagen = soup.findAll('img',class_="img-responsive")
-        imagen = imagen[1]["src"]
         cuerpo = ""
         for i in range(len(cuerpo_sub)):
             cuerpo = cuerpo + cuerpo_sub[i].get_text()
@@ -191,7 +194,6 @@ def noticia_un_solo(url):
         print(autor)
         print(fecha)
         print(cuerpo)
-        print(imagen)
         print(link) 
        
 
@@ -218,7 +220,7 @@ def generar_un_varias(url):
         except:
             print("NO SE PUDO")
 
-#generar_un_varias("https://news.un.org/en/")
+generar_un_varias("https://news.un.org/en/")
 #noticia_un_solo('https://news.un.org//en/story/2022/08/1125522')
 
 ##EL TIEMPO
@@ -235,15 +237,23 @@ def noticia_tiempo_solo(url):
     cuerpo = ""
     for i in range(len(cuerpo_sub)):
         cuerpo = cuerpo + cuerpo_sub[i].get_text()
-    imagen = soup.find('img')['src']
-    imagen = "https://www.eltiempo.com" + imagen
+
+    descripcion = cuerpo.split(".")[0]
+    lenguaje ="en"
+    dominio = "TheTime"
     link = url
-    print(titulo)
-    print(autor)
-    print(fecha)
-    print(cuerpo)
-    print(imagen)
-    print(link) 
+    p = {
+            "authors":autor,
+            "date_publish":fecha,
+            "description":descripcion,
+            "category":"",
+            "language":lenguaje,
+            "source_domain":dominio,
+            "maintext":cuerpo,
+            "title":titulo,
+            "url":link
+        }  
+    data.append(p)
 
 #El tiempo Varias
 def generar_tiempo_varias(url):
@@ -262,11 +272,16 @@ def generar_tiempo_varias(url):
 #noticia_tiempo_solo("https://www.eltiempo.com/cultura/gente/pablo-escobar-who-are-the-sons-of-the-famous-colombian-drug-lord-619763")
 #generar_tiempo_varias("https://www.eltiempo.com/noticias/english-news")
 
-#def main():
-    #generar_cnn_varias('https://edition.cnn.com/business')
-    #generar_Huffpost_varias("https://www.huffpost.com/")
-    #generar_vice_varias("https://www.vice.com/en/topic/english?page=1")
-    #generar_un_varias("https://news.un.org/en/")
-    #generar_tiempo_varias("https://www.eltiempo.com/noticias/english-news")
+def main():
+    generar_tiempo_varias("https://www.eltiempo.com/noticias/english-news")
+    with open("data.json","w") as f:
+        json.dump(data,f)
+    
 
 #main()
+
+texto =""
+with open("data.json") as f1:
+    texto = json.load(f1)
+print(texto[0])
+print(len(texto))
