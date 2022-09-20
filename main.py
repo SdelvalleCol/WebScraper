@@ -1,3 +1,4 @@
+from distutils.filelist import findall
 import json
 from bs4 import BeautifulSoup
 import requests
@@ -8,6 +9,7 @@ import requests
 ##Vice
 ##UN NEWS
 ##El tiempo --eng version 
+##USA TODAY
 
 ##DESARROLLO
 data_principal = []
@@ -271,12 +273,60 @@ def generar_tiempo_varias(url):
 #noticia_tiempo_solo("https://www.eltiempo.com/cultura/gente/pablo-escobar-who-are-the-sons-of-the-famous-colombian-drug-lord-619763")
 #generar_tiempo_varias("https://www.eltiempo.com/noticias/english-news")
 
+##USA TODAY 
+##Solo
+def generar_today_varias(url):
+    resultado = requests.get(url)
+    contenido = resultado.text
+    soup = BeautifulSoup(contenido,'html.parser')
+    contenedor_links_secciones = soup.findAll('a',class_="gnt_m_sb_mn")
+    for i in range(0,len(contenedor_links_secciones)):
+        hijo_seccion = contenedor_links_secciones[i]["href"]
+        hijo_seccion = "https://www.usatoday.com/"+hijo_seccion
+        resultado_seccion = requests.get(hijo_seccion)
+        contenido_seccion = resultado_seccion.text
+        soup_seccion = BeautifulSoup(contenido_seccion,'html.parser')
+        contenedor_noticias = soup_seccion.findAll('a',class_="gnt_m_flm_a")
+        if(len(contenedor_noticias)>0):
+            for i in range(0,len(contenedor_noticias)):
+                try:
+                    linx = "https://www.usatoday.com/"+contenedor_noticias[i]["href"]
+                    noticia_today_solo(linx)
+                except:
+                    print("No se pudo")
+
+
+def noticia_today_solo(url):
+    resultado = requests.get(url)
+    contenido = resultado.text
+    soup = BeautifulSoup(contenido,'html.parser')
+    cuerpo = soup.find_all("p",class_="gnt_ar_b_p")
+    cuerpo_principal = ""
+    for q in cuerpo:
+        cuerpo_principal = cuerpo_principal + "\n" + q.get_text()
+    p = {
+            "authors":soup.find("a",class_="gnt_ar_by_a").get_text(),
+            "date_publish":soup.find("div",class_="gnt_ar_dt")["aria-label"],
+            "description":cuerpo[0].get_text(),
+            "category":"",
+            "language":"en",
+            "source_domain":"usatoday.com",
+            "maintext":cuerpo_principal,
+            "url":url,
+            "title":soup.find("h1",class_="gnt_ar_hl").get_text()
+        }  
+    data_principal.append(p)
+ 
+#generar_today_varias("https://www.usatoday.com/")
+#noticia_today_solo("https://www.usatoday.com/story/news/politics/2022/09/19/pandemic-is-over-biden-comment-complicates-matters/10425981002/?gnt-cfr=1")
+
 def main():
     generar_cnn_varias('https://edition.cnn.com/business')
     generar_Huffpost_varias("https://www.huffpost.com/")
     generar_vice_varias("https://www.vice.com/en/topic/english?page=1")
     generar_un_varias("https://news.un.org/en/")
     generar_tiempo_varias("https://www.eltiempo.com/noticias/english-news")
+    generar_today_varias("https://www.usatoday.com/")
     with open("data.json","w") as f:
         json.dump(data_principal,f)
 
