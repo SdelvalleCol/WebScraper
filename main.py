@@ -1,5 +1,6 @@
 from distutils.filelist import findall
 import json
+from operator import truediv
 from bs4 import BeautifulSoup
 import requests
 
@@ -14,35 +15,28 @@ import requests
 ##DESARROLLO
 data_principal = []
 ##CNN
-##CNN NEWS SOLO
+##CNN NEWS SOLO// BUSSINES
 def noticia_cnn_solo(url):
     resultado = requests.get(url)
     contenido = resultado.text
     soup = BeautifulSoup(contenido,'html.parser')
     try:
-        titulo = soup.find('h1',class_="pg-headline").get_text()
-        autor = soup.find('span',class_="metadata__byline__author").get_text()
-        fecha = soup.find('p',class_="update-time").get_text()
-        cuerpo = soup.find('div',class_="l-container").get_text()
-        descripcion = cuerpo.split(".")[0]
-        categoria =""
-        link = url
-        dominio = "CNN"
-        lenguaje = "en"
+        cuerpo = soup.find('div',class_="article__content").get_text()
+        p = {
+        "authors":soup.find('span',class_="byline__name").get_text(),
+        "date_publish":soup.find('div',class_="timestamp").get_text(),
+        "description":cuerpo.split(".")[0],
+        "category":"",
+        "language":"en",
+        "source_domain":"CNN",
+        "maintext":cuerpo,
+        "url":url,
+        "title":soup.find('h1',class_="headline__text inline-placeholder").get_text()
+    }
     except:
-        print("")
-    p = {
-            "authors":autor,
-            "date_publish":fecha,
-            "description":descripcion,
-            "category":"",
-            "language":lenguaje,
-            "source_domain":dominio,
-            "maintext":cuerpo,
-            "url":link,
-            "title":titulo
-        }   
-    data_principal.append(p)
+        p = ""
+    return p   
+    #data_principal.append(p)
    
 ##CNN NEWS LINK
 def generar_cnn_varias(url):
@@ -59,7 +53,7 @@ def generar_cnn_varias(url):
             print("NO SE PUDO")
 
 #generar_cnn_varias('https://edition.cnn.com/business')
-##noticia_cnn_solo('https://edition.cnn.com/2022/08/17/business/dodge-electric-muscle-car/index.html')
+# noticia_cnn_solo('https://edition.cnn.com/2022/08/17/business/dodge-electric-muscle-car/index.html')
 
 ##Huffpost
 ##Huffpost solo
@@ -68,37 +62,36 @@ def noticia_Huffpost_solo(url):
     contenido = resultado.text
     soup = BeautifulSoup(contenido,'html.parser')
     try:
-        titulo = soup.find('h1',class_="headline").get_text()
-        autor = soup.find('span',class_="entry-wirepartner__byline").get_text()
-        fecha = soup.find('time').get_text()
         cuerpo = soup.find('div',class_="entry__content-list-container js-cet-unit-buzz_body").get_text()
-        descripcion = cuerpo.split(".")[0]
-        lenguaje = "en"
-        dominio = "HuffPost"
-        link = url
-        
-    except:
-        titulo = soup.find('h1',class_="headline").get_text()
-        autor = soup.find('a',class_="js-entry-link cet-internal-link")['data-vars-item-name']
-        fecha = soup.find('time')['datetime']
-        cuerpo = soup.find('section',class_="entry__content-list js-entry-content js-cet-subunit").get_text()
-        descripcion = cuerpo.split(".")[0]
-        lenguaje = "en"
-        dominio = "HuffPost"
-        link = url
-    p = {
-            "authors":autor,
-            "date_publish":fecha,
-            "description":descripcion,
+        p = {
+            "authors":soup.find('span',class_="entry-wirepartner__byline").get_text(),
+            "date_publish":soup.find('time').get_text(),
+            "description":cuerpo.split(".")[0],
             "category":"",
-            "language":lenguaje,
-            "source_domain":dominio,
+            "language":"en",
+            "source_domain":"HuffPost",
             "maintext":cuerpo,
-            "url":link,
-            "title":titulo
-        }        
-
-    data_principal.append(p)
+            "url":url,
+            "title":soup.find('h1',class_="headline").get_text()
+        }
+    except:
+        try:
+            cuerpo = soup.find('section',class_="entry__content-list js-entry-content js-cet-subunit").get_text()
+            p = {
+                "authors":soup.find('a',class_="js-entry-link cet-internal-link")['data-vars-item-name'],
+                "date_publish":soup.find('time')['datetime'],
+                "description":cuerpo.split(".")[0],
+                "category":"",
+                "language":"en",
+                "source_domain":"HuffPost",
+                "maintext":cuerpo,
+                "url":url,
+                "title":soup.find('h1',class_="headline").get_text()
+            }  
+        except:
+            p = ""
+    return p   
+    #data_principal.append(p)
 
 def generar_Huffpost_varias(url):
     resultado = requests.get(url)
@@ -122,29 +115,24 @@ def noticia_vice_solo(url):
     contenido = resultado.text
     soup = BeautifulSoup(contenido,'html.parser')
     try:
-        titulo = soup.find('h1',class_="smart-header__hed smart-header__hed--size-2").get_text()
         autor_sub = soup.find('div',class_="contributor__meta")
-        autor = autor_sub.findChild("a").get_text()
-        fecha = soup.find('time')['datetime']
         cuerpo = soup.find('div',class_="article__body-components").get_text()
-        descripcion = cuerpo.split(".")[0]
-        lenguaje ="en"
-        dominio ="Vice"
-        link = url 
-    except:
-        print("No se pudo")
-    p = {
-            "authors":autor,
-            "date_publish":fecha,
-            "description":descripcion,
+        p = {
+            "authors":autor_sub.findChild("a").get_text(),
+            "date_publish":soup.find('time')['datetime'],
+            "description":cuerpo.split(".")[0],
             "category":"",
-            "language":lenguaje,
-            "source_domain":dominio,
+            "language":"en",
+            "source_domain":"Vice",
             "maintext":cuerpo,
-            "url":link,
-            "title":titulo
-        }    
-    data_principal.append(p)
+            "url":url,
+            "title":soup.find('h1',class_="smart-header__hed smart-header__hed--size-2").get_text()
+        }  
+    except:
+        p = ""
+      
+    return p   
+    #data_principal.append(p)
 
 ##Vice varias
 def generar_vice_varias(url):
@@ -170,41 +158,28 @@ def noticia_un_solo(url):
     contenido = resultado.text
     soup = BeautifulSoup(contenido,'html.parser')
     try:
-        titulo = soup.find('h1',class_="story-title").get_text()
-        autor = soup.find('span',class_="un-news-full-width scald-credit").get_text()
-        fecha = soup.find('div',class_="field-item even").get_text()
-        cuerpo_sub = soup.findAll('p')
+        cuerpo_sub = soup.find('div',class_="clearfix text-formatted field field--name-field-text-column field--type-text-long field--label-hidden field__item")
+        cuerpo_x = soup.findChildren('p')
         cuerpo = ""
-        for i in range(len(cuerpo_sub)):
-            cuerpo = cuerpo + cuerpo_sub[i].get_text()
-        descripcion = cuerpo.split(".")[0]
-        lenguaje = "en"
-        dominio = "OnuNews"
-        link = url
-    except:
-        titulo = soup.find('h2',class_="story-title quote-text").get_text()
-        autor = soup.find('span',class_="un-news-feature scald-credit").get_text()
-        fecha = soup.find('div',class_="field-item even").get_text()
-        cuerpo_sub = soup.findAll('p')
-        cuerpo = ""
-        for i in range(len(cuerpo_sub)):
-            cuerpo = cuerpo + cuerpo_sub[i].get_text()
-        descripcion = cuerpo.split(".")[0]
-        lenguaje = "en"
-        dominio = "OnuNews"
-        link = url
-    p = {
-            "authors":autor,
-            "date_publish":fecha,
-            "description":descripcion,
+        for i in range(len(cuerpo_x)):
+            if(not(str.__contains__(cuerpo_x[i].get_text(),"Twitter")) and not(str.__contains__(cuerpo_x[i].get_text(),"Email")) and not(str.__contains__(cuerpo_x[i].get_text(),"Facebook")) and not(str.__contains__(cuerpo_x[i].get_text(),"Print"))):
+                cuerpo = cuerpo + cuerpo_x[i].get_text() 
+        p = {
+            "authors":soup.find('div',class_="field__item").get_text(),
+            "date_publish":soup.find('time',class_="datetime").get_text(),
+            "description":cuerpo.split(".")[0],
             "category":"",
-            "language":lenguaje,
-            "source_domain":dominio,
+            "language":"en",
+            "source_domain":"OnuNews",
             "maintext":cuerpo,
-            "url":link,
-            "title":titulo
-        }   
-    data_principal.append(p)
+            "url":url,
+            "title":soup.find('span',class_="field field--name-title field--type-string field--label-hidden").get_text()
+        } 
+    except:
+            p = "sa"
+          
+    return p   
+    #data_principal.append(p)
         
 ##UN VARIAS
 def generar_un_varias(url):
@@ -230,31 +205,24 @@ def noticia_tiempo_solo(url):
     resultado = requests.get(url)
     contenido = resultado.text
     soup = BeautifulSoup(contenido,'html.parser')
-    titulo = soup.find('h1',class_="titulo").get_text()
     contenedor_autor = soup.find('div',class_="author_data")
-    autor = contenedor_autor.findChild("span",class_="who-modulo who")
-    fecha = contenedor_autor.findChild("span",class_="publishedAt").get_text()
     cuerpo_sub = soup.findAll('p',class_="contenido")
     cuerpo = ""
     for i in range(len(cuerpo_sub)):
         cuerpo = cuerpo + cuerpo_sub[i].get_text()
-
-    descripcion = cuerpo.split(".")[0]
-    lenguaje ="en"
-    dominio = "TheTime"
-    link = url
     p = {
-            "authors":autor,
-            "date_publish":fecha,
-            "description":descripcion,
+            "authors":contenedor_autor.findChild("span",class_="who-modulo who"),
+            "date_publish":contenedor_autor.findChild("span",class_="publishedAt").get_text(),
+            "description":cuerpo.split(".")[0],
             "category":"",
-            "language":lenguaje,
-            "source_domain":dominio,
+            "language":"en",
+            "source_domain":"TheTime",
             "maintext":cuerpo,
-            "url":link,
-            "title":titulo
+            "url":url,
+            "title":soup.find('h1',class_="titulo").get_text()
         }  
-    data_principal.append(p)
+    return p   
+    #data_principal.append(p)
 
 #El tiempo Varias
 def generar_tiempo_varias(url):
@@ -315,7 +283,8 @@ def noticia_today_solo(url):
             "url":url,
             "title":soup.find("h1",class_="gnt_ar_hl").get_text()
         }  
-    data_principal.append(p)
+    return p   
+    #data_principal.append(p)
  
 #generar_today_varias("https://www.usatoday.com/")
 #noticia_today_solo("https://www.usatoday.com/story/news/politics/2022/09/19/pandemic-is-over-biden-comment-complicates-matters/10425981002/?gnt-cfr=1")
@@ -337,5 +306,13 @@ def leer():
     print(texto[0])
     print(len(texto)) 
 
-main()
-leer()
+##main()
+##leer()
+
+##Funcionalidades 
+#print(noticia_cnn_solo("https://edition.cnn.com/2022/08/17/business/dodge-electric-muscle-car/index.html"))
+#print(noticia_Huffpost_solo("https://www.huffpost.com/entry/jair-bolsonaro-brazil-election-trump_n_63376ea2e4b0e376dbf6e52b"))
+#print(noticia_vice_solo("https://www.vice.com/en/article/jmk9qy/we-asked-people-with-the-most-useless-sounding-university-degrees-if-they-regret-their-life-choices"))
+#print(noticia_un_solo("https://news.un.org/en/story/2022/09/1129082")["title"])
+#print(noticia_tiempo_solo("https://www.eltiempo.com/cultura/gente/epa-colombia-controversial-colombian-instagram-influencer-daneidy-barrera-619696")["maintext"])
+#print(noticia_today_solo("https://www.usatoday.com/story/news/nation/2022/10/02/hurricane-ian-live-updates-death-toll/8159168001/")["title"])
